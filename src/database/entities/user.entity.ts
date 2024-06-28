@@ -6,17 +6,26 @@ export class UserEntity {
   id: string;
 
   @Column()
+  name: string;
+
+  @Column()
+  phone: string;
+
+  @Column({ default: 'buyer' })
+  status: string;
+
+  @Column({ default: false })
+  premium: boolean;
+
+  @Column({ unique: true })
   email: string;
 
   @Column()
   password: string;
 
-  @Column()
-  firstName: string;
+  @Column({ nullable: true })
+  avatar: string;
 
-  @Column()
-  lastName: string;
-
-  @Column()
+  @Column({ default: true })
   isActive: boolean;
 }

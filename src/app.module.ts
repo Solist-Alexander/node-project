@@ -7,7 +7,7 @@ import configuration from './configs/configs';
 import { AuthModule } from './modules/auth/auth.module';
 import { LoggerModule } from './modules/logger/logger.module';
 import { UserModule } from './modules/user/user.module';
-import { PostgresModule } from './postgres/postgres.module';
+import { PostgresModule } from './modules/postgres/postgres.module';
 
 @Module({
   imports: [
