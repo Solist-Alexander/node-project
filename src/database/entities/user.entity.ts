@@ -1,11 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
+import { RefreshTokenEntity } from './refresh-token.entity';
+import { TableNameEnum } from './enums/table-name.enum';
+import { BaseModel } from './models/base.model';
 
-@Entity({ name: 'users' })
-export class UserEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column()
+@Entity({ name: TableNameEnum.USERS })
+export class UserEntity extends BaseModel {
+  @Column('text')
   name: string;
 
   @Column()
@@ -28,4 +28,7 @@ export class UserEntity {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @OneToMany(() => RefreshTokenEntity, (entity) => entity.user)
+  refreshTokens?: RefreshTokenEntity[];
 }

@@ -1,6 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 
-// import { IUserData } from '../../auth/interfaces/user-data.interface';
 import { LoggerService } from '../../logger/logger.service';
 import { UserRepository } from '../../repository/services/user.repository';
 import { UpdateUserReqDto } from '../dto/req/update-user.req.dto';
@@ -20,12 +19,12 @@ export class UserService {
     return `This action returns a #${id} user`;
   }
 
-  // public async update(
-  //   userData: IUserData,
-  //   updateUserDto: UpdateUserReqDto,
-  // ): Promise<any> {
-  //   return `This action updates a #${userData.userId} user`;
-  // }
+  public async update(
+    id: string,
+    updateUserDto: UpdateUserReqDto,
+  ): Promise<any> {
+    return `This action updates a #${id} user`;
+  }
 
   public async remove(id: string): Promise<any> {
     return `This action removes a #${id} user`;

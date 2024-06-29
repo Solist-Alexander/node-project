@@ -11,7 +11,6 @@ import {
 import { TransformHelper } from '../../../../common/helpers/transform.helper';
 
 export class BaseUserReqDto {
-
   @IsString()
   @Length(3, 50)
   @Transform(TransformHelper.trim)
