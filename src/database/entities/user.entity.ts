@@ -1,7 +1,8 @@
 import { Column, Entity, OneToMany } from 'typeorm';
-import { RefreshTokenEntity } from './refresh-token.entity';
+
 import { TableNameEnum } from './enums/table-name.enum';
 import { BaseModel } from './models/base.model';
+import { RefreshTokenEntity } from './refresh-token.entity';
 
 @Entity({ name: TableNameEnum.USERS })
 export class UserEntity extends BaseModel {

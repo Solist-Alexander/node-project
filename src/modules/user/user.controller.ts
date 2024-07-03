@@ -42,7 +42,7 @@ export class UserController {
   public async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserReqDto,
-  ): Promise<any> {
+  ): Promise<UserResDto> {
     return await this.userService.update(id, updateUserDto);
   }
 
@@ -50,7 +50,7 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @Delete(':id')
-  public async remove(@Param('id', ParseUUIDPipe) id: string): Promise<any> {
+  public async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return await this.userService.remove(id);
   }
 }

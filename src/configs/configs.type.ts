@@ -5,6 +5,7 @@ export type Config = {
   sentry: SentryConfig;
   jwt: JWTConfig;
   aws: AWSConfig;
+  hashRounds: number;
 };
 
 export type AppConfig = {

@@ -7,4 +7,6 @@ export class UpdateUserReqDto extends PickType(BaseUserReqDto, [
   'name',
   'phone',
   'password',
+  'status',
+  'premium',
 ]) {}

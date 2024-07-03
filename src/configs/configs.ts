@@ -12,6 +12,7 @@ export default (): Config => ({
     password: process.env.POSTGRES_PASSWORD,
     dbName: process.env.POSTGRES_DB,
   },
+  hashRounds: Number(process.env.HASH_ROUNDS),
   redis: {
     port: parseInt(process.env.REDIS_PORT) || 6379,
     host: process.env.REDIS_HOST,
