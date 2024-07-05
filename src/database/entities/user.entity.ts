@@ -13,7 +13,7 @@ export class UserEntity extends BaseModel {
   phone: string;
 
   @Column({ default: 'buyer' })
-  status: string;
+  role: string;
 
   @Column({ default: false })
   premium: boolean;

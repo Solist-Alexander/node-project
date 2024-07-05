@@ -23,7 +23,7 @@ export class BaseUserResDto {
     example: 'buyer',
     description: 'The status of the User',
   })
-  status: string;
+  role: string;
 
   @ApiProperty({
     example: false,

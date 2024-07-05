@@ -7,7 +7,7 @@ export class UserMapper {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      status: user.status,
+      role: user.role,
       premium: user.premium,
       avatar: user.avatar || null,
     };

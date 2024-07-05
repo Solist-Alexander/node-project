@@ -25,7 +25,7 @@ export class BaseUserReqDto {
   @IsString()
   @Length(0, 300)
   @ApiProperty({ example: 'buyer' })
-  status?: string;
+  role?: string;
 
   @IsOptional()
   @IsBoolean()

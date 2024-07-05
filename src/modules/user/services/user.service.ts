@@ -10,6 +10,7 @@ import { LoggerService } from '../../logger/logger.service';
 import { RefreshTokenRepository } from '../../repository/services/refresh-token.repository';
 import { UserRepository } from '../../repository/services/user.repository';
 import { UpdateUserReqDto } from '../dto/req/update-user.req.dto';
+import { UpdateUserPremiumDto } from '../dto/req/update-user-premium.dto';
 import { UserResDto } from '../dto/res/user.res.dto';
 import { UserMapper } from './user.mapper';
 
@@ -46,7 +47,7 @@ export class UserService {
       name: user.name,
       phone: user.phone,
       email: user.email,
-      status: user.status,
+      role: user.role,
       premium: user.premium,
       avatar: user.avatar,
     };
@@ -58,9 +59,7 @@ export class UserService {
     id: string,
     updateUserDto: UpdateUserReqDto,
   ): Promise<UserResDto> {
-    const user = await this.userRepository.findOneBy({
-      id: id,
-    });
+    const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -70,15 +69,31 @@ export class UserService {
       const hashedPassword = await this.passwordService.hashPassword(
         updateUserDto.password,
       );
-      user.password = hashedPassword;
+      updateUserDto.password = hashedPassword;
     }
-
-    // await this.userRepository.save(updateUserDto);
 
     const updatedUser = await this.userRepository.save({
       ...user,
       ...updateUserDto,
     });
+
+    return UserMapper.toResponseDTO(updatedUser);
+  }
+
+  public async updatePremium(
+    id: string,
+    updateUserPremiumDto: UpdateUserPremiumDto,
+  ): Promise<UserResDto> {
+    const user = await this.userRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    user.premium = updateUserPremiumDto.premium;
+
+    const updatedUser = await this.userRepository.save(user);
+
     return UserMapper.toResponseDTO(updatedUser);
   }
 
