@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  UseGuards,
   // UseGuards,
 } from '@nestjs/common';
 import {
@@ -18,6 +19,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+import { JwtAccessGuard } from '../auth/guards /jwt-access.guard';
 // import { AdminGuard } from '../auth/guards /admin.guard';
 // import { ManagerGuard } from '../auth/guards /manager.guard';
 import { UpdateUserReqDto } from './dto/req/update-user.req.dto';
@@ -31,6 +33,7 @@ import { UserService } from './services/user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(JwtAccessGuard)
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Not Found' })
@@ -41,6 +44,7 @@ export class UserController {
     return await this.userService.findOne(id);
   }
 
+  @UseGuards(JwtAccessGuard)
   @ApiOperation({ summary: 'Update user' })
   @ApiOkResponse({ type: UserResDto })
   @ApiNotFoundResponse({ description: 'Not Found' })
@@ -53,6 +57,7 @@ export class UserController {
   ): Promise<UserResDto> {
     return await this.userService.update(id, updateUserDto);
   }
+  @UseGuards(JwtAccessGuard)
   @ApiOperation({ summary: 'Update user premium status' })
   @ApiOkResponse({ type: UserResDto })
   @ApiNotFoundResponse({ description: 'Not Found' })
@@ -67,6 +72,7 @@ export class UserController {
   }
 
   // @UseGuards(AdminGuard, ManagerGuard)
+  @UseGuards(JwtAccessGuard)
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Not Found' })

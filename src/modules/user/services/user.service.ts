@@ -27,14 +27,6 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  public async findUserOrThrow(userId: string): Promise<UserEntity> {
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new NotFoundException(`User with id ${userId} not found`);
-    }
-    return user;
-  }
-
   public async findOne(id: string): Promise<UserResDto> {
     const user = await this.userRepository.findOneById(id);
 
@@ -42,7 +34,6 @@ export class UserService {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    // Преобразование данных пользователя в UserResDto
     const userResDto: UserResDto = {
       name: user.name,
       phone: user.phone,

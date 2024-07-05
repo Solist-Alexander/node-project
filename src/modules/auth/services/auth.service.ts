@@ -5,6 +5,9 @@ import { UserRepository } from '../../repository/services/user.repository';
 import { UserService } from '../../user/services/user.service';
 import { SignInReqDto } from '../dto/req/sign-in.req.dto';
 import { SignUpReqDto } from '../dto/req/sign-up.req.dto';
+import { AuthResDto } from '../dto/res/auth.res.dto';
+import { TokenPairResDto } from '../dto/res/token-pair.res.dto';
+import { IUserData } from '../interfaces/user-data.interface';
 import { AuthMapper } from './auth.mapper';
 import { AuthCacheService } from './auth-cache.service';
 import { PasswordService } from './password.service';
@@ -21,7 +24,7 @@ export class AuthService {
     private readonly passwordService: PasswordService,
   ) {}
 
-  public async singUp(dto: SignUpReqDto): Promise<any> {
+  public async singUp(dto: SignUpReqDto): Promise<AuthResDto> {
     await this.userService.isEmailUniqueOrThrow(dto.email);
 
     const password = await this.passwordService.hashPassword(dto.password);
@@ -30,7 +33,6 @@ export class AuthService {
     );
     const pair = await this.tokenService.generateAuthTokens({
       userId: user.id,
-      role: user.role,
       deviceId: dto.deviceId,
     });
     await Promise.all([
@@ -43,12 +45,13 @@ export class AuthService {
       ),
       this.authCacheService.saveToken(pair.accessToken, user.id, dto.deviceId),
     ]);
-    return await AuthMapper.toResponseDTO(user, pair);
+    return AuthMapper.toResponseDTO(user, pair);
   }
 
-  public async signIn(dto: SignInReqDto): Promise<any> {
+  public async signIn(dto: SignInReqDto): Promise<AuthResDto> {
     const user = await this.userRepository.findOne({
       where: { email: dto.email },
+      select: { password: true, id: true },
     });
     if (!user) {
       throw new UnauthorizedException('Wrong email or password');
@@ -64,16 +67,72 @@ export class AuthService {
 
     const tokens = await this.tokenService.generateAuthTokens({
       userId: user.id,
-      deviceId: dto.deviceId, // Ensure deviceId is passed here
-      role: user.role,
+      deviceId: dto.deviceId,
     });
 
-    await this.refreshTokenRepository.save({
-      user_id: user.id,
-      refreshToken: tokens.refreshToken,
-      deviceId: dto.deviceId, // Ensure deviceId is passed here
+    await Promise.all([
+      this.refreshTokenRepository.delete({
+        deviceId: dto.deviceId,
+        user_id: user.id,
+      }),
+      this.authCacheService.deleteToken(user.id, dto.deviceId),
+    ]);
+
+    await Promise.all([
+      this.refreshTokenRepository.save(
+        this.refreshTokenRepository.create({
+          user_id: user.id,
+          refreshToken: tokens.refreshToken,
+          deviceId: dto.deviceId,
+        }),
+      ),
+      this.authCacheService.saveToken(
+        tokens.accessToken,
+        user.id,
+        dto.deviceId,
+      ),
+    ]);
+    const userEntity = await this.userRepository.findOneBy({ id: user.id });
+    return AuthMapper.toResponseDTO(userEntity, tokens);
+  }
+
+  public async refresh(userData: IUserData): Promise<TokenPairResDto> {
+    await Promise.all([
+      this.refreshTokenRepository.delete({
+        deviceId: userData.deviceId,
+        user_id: userData.userId,
+      }),
+      this.authCacheService.deleteToken(userData.userId, userData.deviceId),
+    ]);
+    const pair = await this.tokenService.generateAuthTokens({
+      userId: userData.userId,
+      deviceId: userData.deviceId,
     });
 
-    return { user, tokens };
+    await Promise.all([
+      this.refreshTokenRepository.save(
+        this.refreshTokenRepository.create({
+          user_id: userData.userId,
+          refreshToken: pair.refreshToken,
+          deviceId: userData.deviceId,
+        }),
+      ),
+      this.authCacheService.saveToken(
+        pair.accessToken,
+        userData.userId,
+        userData.deviceId,
+      ),
+    ]);
+    return AuthMapper.toResponseTokensDTO(pair);
+  }
+
+  public async signOut(userData: IUserData): Promise<void> {
+    await Promise.all([
+      this.refreshTokenRepository.delete({
+        deviceId: userData.deviceId,
+        user_id: userData.userId,
+      }),
+      this.authCacheService.deleteToken(userData.userId, userData.deviceId),
+    ]);
   }
 }
