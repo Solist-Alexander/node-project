@@ -5,8 +5,10 @@ import { UserRepository } from '../../repository/services/user.repository';
 import { UserService } from '../../user/services/user.service';
 import { SignInReqDto } from '../dto/req/sign-in.req.dto';
 import { SignUpReqDto } from '../dto/req/sign-up.req.dto';
+import { SignUpManagerReqDto } from '../dto/req/sign-up-manager.req';
 import { AuthResDto } from '../dto/res/auth.res.dto';
 import { TokenPairResDto } from '../dto/res/token-pair.res.dto';
+import { AccountRole } from '../enums/account-role';
 import { IUserData } from '../interfaces/user-data.interface';
 import { AuthMapper } from './auth.mapper';
 import { AuthCacheService } from './auth-cache.service';
@@ -24,6 +26,12 @@ export class AuthService {
     private readonly passwordService: PasswordService,
   ) {}
 
+  private generateDeviceId(): string {
+    const prefix = 'device_';
+    const randomSuffix = Math.random().toString(36).substr(2, 10);
+    return `${prefix}${randomSuffix}`;
+  }
+
   public async singUp(dto: SignUpReqDto): Promise<AuthResDto> {
     await this.userService.isEmailUniqueOrThrow(dto.email);
 
@@ -31,20 +39,24 @@ export class AuthService {
     const user = await this.userRepository.save(
       this.userRepository.create({ ...dto, password }),
     );
+
+    const deviceId = this.generateDeviceId();
     const pair = await this.tokenService.generateAuthTokens({
       userId: user.id,
-      deviceId: dto.deviceId,
+      deviceId,
     });
+
     await Promise.all([
       this.refreshTokenRepository.save(
         this.refreshTokenRepository.create({
           user_id: user.id,
           refreshToken: pair.refreshToken,
-          deviceId: dto.deviceId,
+          deviceId,
         }),
       ),
-      this.authCacheService.saveToken(pair.accessToken, user.id, dto.deviceId),
+      this.authCacheService.saveToken(pair.accessToken, user.id, deviceId),
     ]);
+
     return AuthMapper.toResponseDTO(user, pair);
   }
 
@@ -65,17 +77,22 @@ export class AuthService {
       throw new UnauthorizedException('Wrong email or password');
     }
 
+    let deviceId = dto.deviceId;
+    if (!deviceId) {
+      deviceId = this.generateDeviceId(); // Генерируем новый deviceId, если не указан
+    }
+
     const tokens = await this.tokenService.generateAuthTokens({
       userId: user.id,
-      deviceId: dto.deviceId,
+      deviceId,
     });
 
     await Promise.all([
       this.refreshTokenRepository.delete({
-        deviceId: dto.deviceId,
+        deviceId,
         user_id: user.id,
       }),
-      this.authCacheService.deleteToken(user.id, dto.deviceId),
+      this.authCacheService.deleteToken(user.id, deviceId),
     ]);
 
     await Promise.all([
@@ -83,15 +100,12 @@ export class AuthService {
         this.refreshTokenRepository.create({
           user_id: user.id,
           refreshToken: tokens.refreshToken,
-          deviceId: dto.deviceId,
+          deviceId,
         }),
       ),
-      this.authCacheService.saveToken(
-        tokens.accessToken,
-        user.id,
-        dto.deviceId,
-      ),
+      this.authCacheService.saveToken(tokens.accessToken, user.id, deviceId),
     ]);
+
     const userEntity = await this.userRepository.findOneBy({ id: user.id });
     return AuthMapper.toResponseDTO(userEntity, tokens);
   }
@@ -134,5 +148,37 @@ export class AuthService {
       }),
       this.authCacheService.deleteToken(userData.userId, userData.deviceId),
     ]);
+  }
+
+  public async createManager(dto: SignUpManagerReqDto): Promise<AuthResDto> {
+    await this.userService.isEmailUniqueOrThrow(dto.email);
+
+    const password = await this.passwordService.hashPassword(dto.password);
+    const deviceId = this.generateDeviceId();
+
+    const userToCreate = {
+      ...dto,
+      password,
+      role: AccountRole.MANAGER,
+      deviceId,
+    };
+
+    const user = await this.userRepository.save(userToCreate);
+
+    const pair = await this.tokenService.generateAuthTokens({
+      userId: user.id,
+      deviceId,
+    });
+
+    await Promise.all([
+      this.refreshTokenRepository.save({
+        user_id: user.id,
+        refreshToken: pair.refreshToken,
+        deviceId,
+      }),
+      this.authCacheService.saveToken(pair.accessToken, user.id, deviceId),
+    ]);
+
+    return AuthMapper.toResponseDTO(user, pair);
   }
 }

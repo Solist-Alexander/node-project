@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsEnum,
   IsOptional,
   IsString,
   Length,
@@ -9,6 +10,7 @@ import {
 } from 'class-validator';
 
 import { TransformHelper } from '../../../../common/helpers/transform.helper';
+import { AccountRole } from '../../../auth/enums/account-role';
 
 export class BaseUserReqDto {
   @IsString()
@@ -24,8 +26,9 @@ export class BaseUserReqDto {
   @IsOptional()
   @IsString()
   @Length(0, 300)
-  @ApiProperty({ example: 'buyer' })
-  role?: string;
+  @IsEnum(AccountRole)
+  @ApiProperty({ example: AccountRole.BUYER })
+  role?: AccountRole;
 
   @IsOptional()
   @IsBoolean()

@@ -1,5 +1,7 @@
-import { PickType } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { IsIn, IsOptional } from 'class-validator';
 
+import { AccountRole } from '../../enums/account-role';
 import { BaseAuthReqDto } from './base-auth.req.dto';
 
 export class SignUpReqDto extends PickType(BaseAuthReqDto, [
@@ -7,6 +9,9 @@ export class SignUpReqDto extends PickType(BaseAuthReqDto, [
   'email',
   'password',
   'phone',
-  'role',
-  'deviceId',
-]) {}
+]) {
+  @IsOptional()
+  @IsIn([AccountRole.SELLER, AccountRole.BUYER])
+  @ApiProperty({ example: AccountRole.BUYER })
+  role?: AccountRole;
+}

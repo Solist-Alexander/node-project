@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from '../auth/auth.module';
 import { PasswordService } from '../auth/services/password.service';
 import { TokenService } from '../auth/services/token.service';
+import { AdminService } from './services/admin.service';
 import { UserService } from './services/user.service';
 import { UserController } from './user.controller';
 
@@ -15,7 +16,7 @@ import { UserController } from './user.controller';
     forwardRef(() => AuthModule),
   ],
   controllers: [UserController],
-  providers: [UserService, PasswordService, TokenService],
-  exports: [UserService],
+  providers: [UserService, PasswordService, TokenService, AdminService],
+  exports: [UserService, AdminService],
 })
 export class UserModule {}

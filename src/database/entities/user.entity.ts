@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 
+import { AccountRole } from '../../modules/auth/enums/account-role';
 import { TableNameEnum } from './enums/table-name.enum';
 import { BaseModel } from './models/base.model';
 import { RefreshTokenEntity } from './refresh-token.entity';
@@ -12,8 +13,12 @@ export class UserEntity extends BaseModel {
   @Column()
   phone: string;
 
-  @Column({ default: 'buyer' })
-  role: string;
+  @Column({
+    type: 'enum',
+    enum: AccountRole,
+    default: AccountRole.BUYER,
+  })
+  role: AccountRole;
 
   @Column({ default: false })
   premium: boolean;
