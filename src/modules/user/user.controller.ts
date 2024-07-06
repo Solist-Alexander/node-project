@@ -45,7 +45,7 @@ export class UserController {
   }
   @ApiTags('Admin')
   @ApiTags('Manager')
-  @UseGuards(AdminGuard, ManagerGuard)
+  @UseGuards(ManagerGuard)
   @Get(':id')
   public async findOne(
     @Param('id', ParseUUIDPipe) id: string,

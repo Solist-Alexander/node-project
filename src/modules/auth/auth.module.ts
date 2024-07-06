@@ -5,8 +5,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { RedisModule } from '../redis/redis.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
+import { AdminGuard } from './guards /admin.guard';
 import { JwtAccessGuard } from './guards /jwt-access.guard';
 import { JwtRefreshGuard } from './guards /jwt-refresh.guard';
+import { ManagerGuard } from './guards /manager.guard';
 import { AuthService } from './services/auth.service';
 import { AuthCacheService } from './services/auth-cache.service';
 import { PasswordService } from './services/password.service';
@@ -20,12 +22,14 @@ import { TokenService } from './services/token.service';
     TokenService,
     AuthCacheService,
     PasswordService,
+    AdminGuard,
+    ManagerGuard,
     {
       provide: APP_GUARD,
       useClass: JwtAccessGuard,
     },
     JwtRefreshGuard,
   ],
-  exports: [AuthCacheService],
+  exports: [TokenService, AuthCacheService, AdminGuard, ManagerGuard],
 })
 export class AuthModule {}
