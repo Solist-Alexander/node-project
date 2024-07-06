@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 
 import { AccountRole } from '../../modules/auth/enums/account-role';
+import { BannedUserEntity } from './banned-user.entity';
 import { TableNameEnum } from './enums/table-name.enum';
 import { BaseModel } from './models/base.model';
 import { RefreshTokenEntity } from './refresh-token.entity';
@@ -37,4 +38,7 @@ export class UserEntity extends BaseModel {
 
   @OneToMany(() => RefreshTokenEntity, (entity) => entity.user)
   refreshTokens?: RefreshTokenEntity[];
+
+  @OneToMany(() => BannedUserEntity, (bannedUser) => bannedUser.user)
+  bans?: BannedUserEntity[];
 }

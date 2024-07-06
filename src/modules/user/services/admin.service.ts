@@ -1,9 +1,6 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { BannedUserEntity } from '../../../database/entities/banned-user.entity';
 import { PasswordService } from '../../auth/services/password.service';
 import { LoggerService } from '../../logger/logger.service';
 import { RefreshTokenRepository } from '../../repository/services/refresh-token.repository';
@@ -22,8 +19,8 @@ export class AdminService {
     private readonly passwordService: PasswordService,
   ) {}
 
-  public async findAll(): Promise<any> {
-    return `This action returns all user`;
+  async getListUser(): Promise<UserResDto[]> {
+    return await this.userRepository.getList();
   }
 
   public async findOne(id: string): Promise<UserResDto> {
@@ -98,5 +95,30 @@ export class AdminService {
     const updatedUser = await this.userRepository.save(user);
 
     return UserMapper.toResponseDTO(updatedUser);
+  }
+
+  async CheckUserIsBanned(userId: string): Promise<boolean> {
+    return await this.userRepository.isUserBanned(userId);
+  }
+
+  async BanUser(userId: string, reason: string): Promise<string> {
+    const isBanned = await this.CheckUserIsBanned(userId);
+
+    if (isBanned) {
+      return 'The user has already been banned';
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      return 'User not found';
+    }
+
+    const bannedUser = new BannedUserEntity();
+    bannedUser.user = user;
+    bannedUser.reason = reason;
+    await this.userRepository.manager.save(bannedUser);
+
+    return 'User successfully banned';
   }
 }
