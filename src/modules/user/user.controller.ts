@@ -119,9 +119,22 @@ export class UserController {
   @ApiOperation({ summary: 'Ban a user' })
   async BanUser(
     @Body() banUserReqDto: BanUserReqDto,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<{ message: string }> {
-    const { userId, reason } = banUserReqDto;
-    const message = await this.adminService.BanUser(userId, reason);
+    const message = await this.adminService.BanUser(id, banUserReqDto.reason);
+    return { message };
+  }
+
+  @ApiTags('Admin')
+  @ApiTags('Manager')
+  @UseGuards(ManagerGuard)
+  @Post(':id/unbanUser')
+  @ApiOperation({ summary: 'Разбанить пользователя' })
+  @UseGuards(ManagerGuard)
+  async unbanUser(
+    @Param('userId') userId: string,
+  ): Promise<{ message: string }> {
+    const message = await this.adminService.unbanUser(userId);
     return { message };
   }
 }

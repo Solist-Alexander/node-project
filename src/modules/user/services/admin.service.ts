@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BannedUserEntity } from '../../../database/entities/banned-user.entity';
 import { PasswordService } from '../../auth/services/password.service';
 import { LoggerService } from '../../logger/logger.service';
+import { BannedUserRepository } from '../../repository/services/banned-user.repository';
 import { RefreshTokenRepository } from '../../repository/services/refresh-token.repository';
 import { UserRepository } from '../../repository/services/user.repository';
 import { UpdateUserReqDto } from '../dto/req/update-user.req.dto';
@@ -15,6 +16,7 @@ export class AdminService {
   constructor(
     private readonly logger: LoggerService,
     private readonly userRepository: UserRepository,
+    private readonly bannedUserRepository: BannedUserRepository,
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly passwordService: PasswordService,
   ) {}
@@ -120,5 +122,22 @@ export class AdminService {
     await this.userRepository.manager.save(bannedUser);
 
     return 'User successfully banned';
+  }
+
+  async unbanUser(userId: string): Promise<string> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error(`Пользователь с ID ${userId} не найден`);
+    }
+
+    const bannedUser = await this.bannedUserRepository.findOne({
+      where: { user: { id: userId } },
+    });
+    if (!bannedUser) {
+      throw new Error(`Пользователь с ID ${userId} не был забанен ранее`);
+    }
+
+    await this.bannedUserRepository.delete(bannedUser.id);
+    return `Пользователь с ID ${userId} успешно разбанен`;
   }
 }

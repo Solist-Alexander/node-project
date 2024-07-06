@@ -12,7 +12,7 @@ export class BaseBanUserReqDto {
   @Type(() => String)
   userId: string;
 
-  @ApiProperty({ example: 'Нарушение правил' })
+  @ApiProperty({ example: 'Violation of rules' })
   @IsString()
   @Length(1, 300)
   @Transform(TransformHelper.trim)
