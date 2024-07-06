@@ -54,9 +54,9 @@ export class JwtAccessGuard implements CanActivate {
     const user = await this.userRepository.findOneBy({
       id: payload.userId,
     });
-    // if (!user) {
-    //   throw new UnauthorizedException();
-    // }
+    if (!user) {
+      throw new UnauthorizedException();
+    }
     request.user = AuthMapper.toUserDataDTO(user, payload.deviceId);
     return true;
   }
