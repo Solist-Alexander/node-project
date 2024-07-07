@@ -13,6 +13,8 @@ import {
 } from 'class-validator';
 
 import { TransformHelper } from '../../../../common/helpers/transform.helper';
+import { CarBrandEnum } from '../../enums/car-brand.enum';
+import { CarModelEnum } from '../../enums/car-model.enum';
 
 export class BasePostReqDto {
   @IsString()
@@ -47,7 +49,7 @@ export class BasePostReqDto {
   @MaxLength(100, {
     message: 'Brand is too long. Maximal length is $constraint1 characters.',
   })
-  brand: string;
+  brand: CarBrandEnum;
 
   @IsString()
   @IsNotEmpty()
@@ -57,7 +59,7 @@ export class BasePostReqDto {
   @MaxLength(100, {
     message: 'Model is too long. Maximal length is $constraint1 characters.',
   })
-  model: string;
+  model: CarModelEnum;
 
   @IsNumber()
   @IsNotEmpty()

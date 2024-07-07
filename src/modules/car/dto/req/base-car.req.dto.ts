@@ -12,6 +12,8 @@ import {
 } from 'class-validator';
 
 import { TransformHelper } from '../../../../common/helpers/transform.helper';
+import { CarBrandEnum } from '../../enums/car-brand.enum';
+import { CarModelEnum } from '../../enums/car-model.enum';
 
 export class BaseCarReqDto {
   @ApiProperty({ example: 'Toyota' })
@@ -23,7 +25,7 @@ export class BaseCarReqDto {
   @MaxLength(100, {
     message: 'Brand is too long. Maximal length is $constraint1 characters.',
   })
-  brand: string;
+  brand: CarBrandEnum;
 
   @ApiProperty({ example: 'Camry' })
   @IsString()
@@ -34,7 +36,7 @@ export class BaseCarReqDto {
   @MaxLength(100, {
     message: 'Model is too long. Maximal length is $constraint1 characters.',
   })
-  model: string;
+  model: CarModelEnum;
 
   @ApiProperty({ example: 2020 })
   @IsNumber()

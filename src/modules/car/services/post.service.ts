@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 
 import { PostEntity } from '../../../database/entities/post.entity';
+import { AccountRole } from '../../auth/enums/account-role';
 import { IUserData } from '../../auth/interfaces/user-data.interface';
 import { CarRepository } from '../../repository/services/car.repository';
 import { PostRepository } from '../../repository/services/post.repository';
@@ -13,6 +14,8 @@ import { UserRepository } from '../../repository/services/user.repository';
 import { bannedWords } from '../constants/banned-words.constants';
 import { CreatePostReqDto } from '../dto/req/create-post.req.dto';
 import { PostResDto } from '../dto/res/post.res.dto';
+import { CarBrandEnum } from '../enums/car-brand.enum';
+import { CarModelEnum } from '../enums/car-model.enum';
 
 @Injectable()
 export class PostService {
@@ -36,7 +39,7 @@ export class PostService {
       where: { id: userData.userId },
     });
 
-    if (!user || user.role !== 'seller') {
+    if (!user || user.role !== AccountRole.SELLER) {
       throw new UnauthorizedException('Only sellers can create posts.');
     }
 
@@ -58,6 +61,8 @@ export class PostService {
 
     const newPost = this.postRepository.create({
       ...postData,
+      brand: CarBrandEnum[dto.brand], // Преобразуйте dto.brand в соответствующее перечисление
+      model: CarModelEnum[dto.model], // Преобразуйте dto.model в соответствующее перечисление
       id_sender: userData.userId,
     });
 
@@ -65,6 +70,8 @@ export class PostService {
 
     return {
       ...savedPost,
+      brand: savedPost.brand as CarBrandEnum, // Убедитесь, что типы соответствуют ожидаемым
+      model: savedPost.model as CarModelEnum, // Убедитесь, что типы соответствуют ожидаемым
     };
   }
   async getAllPosts(): Promise<PostEntity[]> {

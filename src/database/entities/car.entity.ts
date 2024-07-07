@@ -1,15 +1,23 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 
+import { CarBrandEnum } from '../../modules/car/enums/car-brand.enum';
+import { CarModelEnum } from '../../modules/car/enums/car-model.enum';
 import { DealershipEntity } from './dealership.entity';
 import { BaseModel } from './models/base.model';
 
 @Entity()
 export class CarEntity extends BaseModel {
-  @Column()
-  brand: string;
+  @Column({
+    type: 'enum',
+    enum: CarBrandEnum,
+  })
+  brand: CarBrandEnum;
 
-  @Column()
-  model: string;
+  @Column({
+    type: 'enum',
+    enum: CarModelEnum,
+  })
+  model: CarModelEnum;
 
   @Column()
   year: number;
