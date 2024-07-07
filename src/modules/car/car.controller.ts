@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -24,6 +25,7 @@ import { CreatePostReqDto } from './dto/req/create-post.req.dto';
 import { PostResDto } from './dto/res/post.res.dto';
 import { CarService } from './services/car.service';
 import { PostService } from './services/post.service';
+import { PremiumService } from './services/premium.service';
 
 @ApiForbiddenResponse({ description: 'Forbidden' })
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -35,6 +37,7 @@ export class CarController {
   constructor(
     private readonly carService: CarService,
     private readonly postService: PostService,
+    private readonly premiumService: PremiumService,
   ) {}
 
   @ApiTags('Seller')
@@ -68,6 +71,15 @@ export class CarController {
     @CurrentUser() userData: IUserData,
   ): Promise<void> {
     await this.postService.deletePostMe(postId, userData.userId);
+  }
+
+  @ApiTags('Premium Seller')
+  @Get('average-price')
+  async getAveragePrice(
+    @Query('brand') brand: string,
+    @Query('model') model: string,
+  ): Promise<number> {
+    return await this.premiumService.getAveragePrice(brand, model);
   }
   // @Post('createCar')
   // @ApiCreatedResponse({ type: CarResDto })

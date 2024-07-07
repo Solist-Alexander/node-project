@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -9,6 +10,7 @@ import { IUserData } from '../../auth/interfaces/user-data.interface';
 import { CarRepository } from '../../repository/services/car.repository';
 import { PostRepository } from '../../repository/services/post.repository';
 import { UserRepository } from '../../repository/services/user.repository';
+import { bannedWords } from '../constants/banned-words.constants';
 import { CreatePostReqDto } from '../dto/req/create-post.req.dto';
 import { PostResDto } from '../dto/res/post.res.dto';
 
@@ -19,6 +21,12 @@ export class PostService {
     private readonly postRepository: PostRepository,
     private readonly userRepository: UserRepository,
   ) {}
+
+  private containsBannedWords(text: string): boolean {
+    const lowerCaseText: string = text.toLowerCase();
+    return bannedWords.some((word: string) => lowerCaseText.includes(word));
+  }
+
   public async createPost(
     dto: CreatePostReqDto,
     userData: IUserData,
@@ -27,18 +35,11 @@ export class PostService {
     const user = await this.userRepository.findOne({
       where: { id: userData.userId },
     });
-    if (
-      !user ||
-      !(
-        user.role === 'seller' ||
-        user.role === 'admin' ||
-        user.role === 'manager'
-      )
-    ) {
-      throw new UnauthorizedException(
-        'Only sellers, admins or super admins can create posts.',
-      );
+
+    if (!user || user.role !== 'seller') {
+      throw new UnauthorizedException('Only sellers can create posts.');
     }
+
     if (!user.premium) {
       const userPostsCount = await this.postRepository.count({
         where: { id_sender: userData.userId },
@@ -49,7 +50,13 @@ export class PostService {
         );
       }
     }
-    const newPost = await this.postRepository.create({
+
+    // Profanity check
+    if (this.containsBannedWords(dto.message)) {
+      throw new BadRequestException('Post contains banned words');
+    }
+
+    const newPost = this.postRepository.create({
       ...postData,
       id_sender: userData.userId,
     });

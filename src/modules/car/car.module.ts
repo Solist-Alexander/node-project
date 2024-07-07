@@ -13,6 +13,7 @@ import { UserModule } from '../user/user.module';
 import { CarController } from './car.controller';
 import { CarService } from './services/car.service';
 import { PostService } from './services/post.service';
+import { PremiumService } from './services/premium.service';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PostService } from './services/post.service';
     ManagerGuard,
     TokenService,
     AuthCacheService,
+    PremiumService,
   ],
 })
 export class CarModule {}
