@@ -48,13 +48,20 @@ export class UserController {
   @ApiTags('Users')
   @ApiOperation({ summary: 'Update Me' })
   @ApiOkResponse({ type: UserResDto })
-  @Patch('UpdateMe')
+  @Patch('updateMe')
   public async UpdateMe(
     @Body() updateUserDto: UpdateUserReqDto,
     @CurrentUser() userData: IUserData,
   ): Promise<UserResDto> {
     return await this.userService.UpdateMe(userData, updateUserDto);
   }
+
+  @ApiTags('Users')
+  @Delete('removeMe')
+  public async removeMe(@CurrentUser() userData: IUserData): Promise<void> {
+    return await this.userService.removeMe(userData);
+  }
+
   @ApiTags('Admin')
   @ApiTags('Manager')
   @UseGuards(ManagerGuard)
@@ -75,7 +82,7 @@ export class UserController {
   @ApiTags('Admin')
   @ApiOperation({ summary: 'Update user' })
   @ApiOkResponse({ type: UserResDto })
-  @Patch(':id/UpdateUser')
+  @Patch(':id/updateUser')
   public async updateUser(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserReqDto,
@@ -97,21 +104,24 @@ export class UserController {
   @UseGuards(AdminGuard)
   @ApiTags('Admin')
   @Delete(':id')
-  public async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  public async removeUser(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
     return await this.adminService.removeUser(id);
   }
 
-  // @ApiTags('Admin')
-  // @ApiTags('Manager')
-  // @UseGuards(ManagerGuard)
-  // @Get(':id/CheckUserIsBanned')
-  // @ApiOperation({ summary: 'Check if user is banned' })
-  // async CheckUserIsBanned(
-  //   @Param('id') userId: string,
-  // ): Promise<{ isBanned: boolean }> {
-  //   const isBanned = await this.adminService.CheckUserIsBanned(userId);
-  //   return { isBanned };
-  // }
+  @ApiTags('Admin')
+  @ApiTags('Manager')
+  @UseGuards(ManagerGuard)
+  @Get(':id/CheckUserIsBanned')
+  @ApiOperation({ summary: 'Check if user is banned' })
+  async CheckUserIsBanned(
+    @Param('id') userId: string,
+  ): Promise<{ isBanned: boolean; reason?: string }> {
+    const result = await this.adminService.checkUserIsBannedWithReason(userId);
+    return { isBanned: result.isBanned, reason: result.reason };
+  }
+
   @ApiTags('Admin')
   @ApiTags('Manager')
   @UseGuards(ManagerGuard)

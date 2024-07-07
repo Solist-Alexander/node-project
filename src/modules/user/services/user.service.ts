@@ -49,6 +49,19 @@ export class UserService {
 
     return UserMapper.toResponseDTO(updatedUser);
   }
+
+  public async removeMe(userData: IUserData): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id: userData.userId },
+    });
+
+    await this.refreshTokenRepository.delete({ user: user });
+
+    await this.userRepository.remove(user);
+
+    this.logger.log(`Пользователь с ID ${userData.userId} удалён`);
+  }
+
   public async isEmailUniqueOrThrow(email: string): Promise<void> {
     const user = await this.userRepository.findOneBy({ email });
     if (user) {

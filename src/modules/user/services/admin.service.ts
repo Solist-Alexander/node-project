@@ -103,6 +103,19 @@ export class AdminService {
     return await this.userRepository.isUserBanned(userId);
   }
 
+  async checkUserIsBannedWithReason(
+    userId: string,
+  ): Promise<{ isBanned: boolean; reason?: string }> {
+    const isBanned = await this.userRepository.isUserBanned(userId);
+    if (isBanned) {
+      const reason =
+        await this.bannedUserRepository.findBannedUserReason(userId);
+      return { isBanned: true, reason };
+    } else {
+      return { isBanned: false };
+    }
+  }
+
   async BanUser(userId: string, reason: string): Promise<string> {
     const isBanned = await this.CheckUserIsBanned(userId);
 
