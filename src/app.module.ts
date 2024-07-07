@@ -10,6 +10,7 @@ import { PostgresModule } from './modules/postgres/postgres.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { RepositoryModule } from './modules/repository/repository.module';
 import { UserModule } from './modules/user/user.module';
+import { CarModule } from './modules/car/car.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserModule } from './modules/user/user.module';
     RedisModule,
     AuthModule,
     UserModule,
+    CarModule,
   ],
   controllers: [],
   providers: [

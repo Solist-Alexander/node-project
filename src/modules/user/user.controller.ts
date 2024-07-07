@@ -35,6 +35,7 @@ import { UserService } from './services/user.service';
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @ApiNotFoundResponse({ description: 'Not Found' })
 @ApiBearerAuth()
+@UseGuards(BannedUserGuard)
 @Controller('users')
 export class UserController {
   constructor(
@@ -43,7 +44,6 @@ export class UserController {
   ) {}
   @ApiTags('Users')
   @Get('getMe')
-  @UseGuards(BannedUserGuard)
   public async getMe(@CurrentUser() userData: IUserData): Promise<UserResDto> {
     return await this.userService.getMe(userData);
   }
