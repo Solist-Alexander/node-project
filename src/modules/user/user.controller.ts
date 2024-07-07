@@ -21,6 +21,7 @@ import {
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AdminGuard } from '../auth/guards /admin.guard';
+import { BannedUserGuard } from '../auth/guards /banned-user.guard';
 import { ManagerGuard } from '../auth/guards /manager.guard';
 import { IUserData } from '../auth/interfaces/user-data.interface';
 import { BanUserReqDto } from './dto/req/ban-user.req.dto';
@@ -42,6 +43,7 @@ export class UserController {
   ) {}
   @ApiTags('Users')
   @Get('getMe')
+  @UseGuards(BannedUserGuard)
   public async getMe(@CurrentUser() userData: IUserData): Promise<UserResDto> {
     return await this.userService.getMe(userData);
   }
